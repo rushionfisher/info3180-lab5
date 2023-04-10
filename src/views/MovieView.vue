@@ -24,15 +24,15 @@
       display: flex;
       flex-direction: row;
       background-color: #fff;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
       border-radius: 0.5rem;
       overflow: hidden;
-      width: 40%;
+      width: 50%;
       margin-bottom: 1rem;
     }
   
     .card-image {
-      flex: 0 0 40%;
+      flex: 0 0 50%;
       overflow: hidden;
     }
   
