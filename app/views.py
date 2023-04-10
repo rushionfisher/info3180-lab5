@@ -5,9 +5,13 @@ Werkzeug Documentation:  https://werkzeug.palletsprojects.com/
 This file creates your application.
 """
 
-from app import app
-from flask import render_template, request, jsonify, send_file
+from app import app,db
+from flask import render_template, request, jsonify, send_file, redirect, flash, url_for, abort, session, send_from_directory
 import os
+from werkzeug.utils import secure_filename
+from app.models import Movie
+from app.forms import MovieForm
+from flask_wtf.csrf import generate_csrf
 
 
 ###
@@ -18,6 +22,48 @@ import os
 def index():
     return jsonify(message="This is the beginning of our API")
 
+
+@app.route('/api/v1/movies', methods=['POST','GET'])
+def movies():
+    form = MovieForm()
+    if request.method == "GET":
+        movies = Movie.query.all()
+        movie_info = []
+        for movie in movies:
+            movie_info.append({
+                "id": movie.id,
+                "title": movie.title,
+                "description": movie.description,
+                "poster": url_for('posters', filename=movie.poster)
+            })
+
+        return jsonify(movies=movie_info)
+    
+    elif request.method == 'POST' and form.validate_on_submit():
+        title = form.title.data
+        poster = form.poster.data
+        description = form.description.data
+
+        # Save the movie file to the upload folder
+        filename = poster.filename
+        poster.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+        movie = Movie(title=title, poster=filename, description=description)
+        db.session.add(movie)
+        db.session.commit()
+
+        response = {
+            "message": "Movie Successfully added",
+            "title": title,
+            "poster": filename,
+            "description": description
+        }
+        return jsonify(response), 201
+    else:
+        # Return the form validation errors in JSON format
+        errors = form_errors(form)
+        response = {"errors": errors}
+        return jsonify(response), 400
 
 ###
 # The functions below should be applicable to all Flask apps.
