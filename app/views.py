@@ -64,11 +64,16 @@ def movies():
         errors = form_errors(form)
         response = {"errors": errors}
         return jsonify(response), 400
+    
 
-###
-# The functions below should be applicable to all Flask apps.
-###
+@app.route("/api/v1/posters/<filename>")
+def posters(filename):
+    return send_from_directory(os.path.join(os.getcwd(), app.config['UPLOAD_FOLDER']), filename)
 
+
+@app.route('/api/v1/csrf-token', methods=['GET'])
+def get_csrf():
+ return jsonify({'csrf_token': generate_csrf()})
 # Here we define a function to collect form errors from Flask-WTF
 # which we can later use
 def form_errors(form):
@@ -83,6 +88,7 @@ def form_errors(form):
             error_messages.append(message)
 
     return error_messages
+
 
 @app.route('/<file_name>.txt')
 def send_text_file(file_name):
